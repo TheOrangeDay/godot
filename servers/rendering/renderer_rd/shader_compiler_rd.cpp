@@ -33,8 +33,8 @@
 #include "core/config/project_settings.h"
 #include "core/os/os.h"
 #include "renderer_storage_rd.h"
-#include "servers/rendering_server.h"
 #include "servers/rendering/shader_preprocessor.h"
+#include "servers/rendering_server.h"
 
 #define SL ShaderLanguage
 
@@ -1408,8 +1408,6 @@ ShaderLanguage::DataType ShaderCompilerRD::_get_variable_type(const StringName &
 	return RS::global_variable_type_get_shader_datatype(gvt);
 }
 
-
-
 Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, IdentifierActions *p_actions, const String &p_path, GeneratedCode &r_gen_code) {
 	Error err = parser.compile(p_code, ShaderTypes::get_singleton()->get_functions(p_mode), ShaderTypes::get_singleton()->get_modes(p_mode), ShaderLanguage::VaryingFunctionNames(), ShaderTypes::get_singleton()->get_types(), _get_variable_type);
 
@@ -1417,10 +1415,9 @@ Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, Ide
 		// create shader preprocessor block here again
 		ShaderDependencyGraph graph;
 		graph.populate(p_code);
-		ShaderDependencyNode* context;
+		ShaderDependencyNode *context;
 		int adjusted_line = parser.get_error_line();
-		for (ShaderDependencyNode* node : graph.nodes)
-		{
+		for (ShaderDependencyNode *node : graph.nodes) {
 			adjusted_line = node->GetContext(parser.get_error_line(), &context);
 			break;
 		}
@@ -1428,24 +1425,19 @@ Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, Ide
 		String path = p_path;
 		Vector<String> shader;
 
-		if (context)
-		{
-			if (!context->shader.is_null())
-			{
+		if (context) {
+			if (!context->shader.is_null()) {
 				shader = context->shader->get_code().split("\n");
 				path = context->shader->get_path();
-			}
-			else if (!context->path.is_empty())
-			{
+			} else if (!context->path.is_empty()) {
 				shader = context->code.split("\n");
 				path = context->path;
-			}
-			else
+			} else
 				shader = p_code.split("\n");
-		}
-		else
+		} else {
 			shader = p_code.split("\n");
-		
+		}
+
 		for (int i = 0; i < shader.size(); i++) {
 			if (i + 1 == adjusted_line) {
 				// Mark the error line to be visible without having to look at
