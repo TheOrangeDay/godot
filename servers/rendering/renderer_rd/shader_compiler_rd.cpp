@@ -1445,7 +1445,6 @@ Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, Ide
 		}
 		else
 			shader = p_code.split("\n");
-
 		
 		for (int i = 0; i < shader.size(); i++) {
 			if (i + 1 == adjusted_line) {

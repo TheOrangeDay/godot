@@ -931,7 +931,6 @@ ShaderEditor::ShaderEditor(EditorNode *p_node) {
 
 	panel_split->add_child(shader_dependency_tree);
 	shader_editor->set_shader_dependency_tree(shader_dependency_tree);
-	
 
 	HBoxContainer *hbc = memnew(HBoxContainer);
 
