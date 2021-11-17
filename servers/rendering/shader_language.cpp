@@ -8990,20 +8990,20 @@ uint32_t ShaderLanguage::get_warning_flags() const {
 #endif // DEBUG_ENABLED
 
 Error ShaderLanguage::compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const VaryingFunctionNames &p_varying_function_names, const Set<String> &p_shader_types, GlobalVariableGetTypeFunc p_global_variable_type_func) {
-	clear();
-
 	Error err = OK;
 	code = _preprocess_shader(p_code, &err);
 	if (err != OK) {
 		return err;
 	}
 
+	// clear after preprocessing. Because preprocess uses the resource loader, it means if this instance is held in a singleton, it can have a changed state after.
+	clear();
+
 	global_var_get_type_func = p_global_variable_type_func;
 	varying_function_names = p_varying_function_names;
 
 	nodes = nullptr;
 
-	char_idx = 0; // reset char idx after preprocess because this compiler exists in a singleton and can be overwritten when called recursively.
 	shader = alloc_node<ShaderNode>();
 	err = _parse_shader(p_functions, p_render_modes, p_shader_types);
 

@@ -1409,12 +1409,14 @@ ShaderLanguage::DataType ShaderCompilerRD::_get_variable_type(const StringName &
 }
 
 Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, IdentifierActions *p_actions, const String &p_path, GeneratedCode &r_gen_code) {
+	// cheat the context here for now.
+	ShaderDependencyGraph graph;
+	graph.populate(p_code);
+
+	// TODO could supply the pregenerated context from above as well.
 	Error err = parser.compile(p_code, ShaderTypes::get_singleton()->get_functions(p_mode), ShaderTypes::get_singleton()->get_modes(p_mode), ShaderLanguage::VaryingFunctionNames(), ShaderTypes::get_singleton()->get_types(), _get_variable_type);
 
 	if (err != OK) {
-		// create shader preprocessor block here again
-		ShaderDependencyGraph graph;
-		graph.populate(p_code);
 		ShaderDependencyNode *context;
 		int adjusted_line = parser.get_error_line();
 		for (ShaderDependencyNode *node : graph.nodes) {

@@ -251,9 +251,15 @@ void ShaderTextEditor::_code_complete_script(const String &p_code, List<ScriptCo
 void ShaderTextEditor::_validate_script() {
 	_check_shader_mode();
 
-	String code = get_text_editor()->get_text();
 	//List<StringName> params;
 	//shader->get_param_list(&params);
+
+	// force apply current shader.
+	String code = get_text_editor()->get_text();
+	shader->set_code(code);
+
+	// reset code to parent shader code
+	code = shader_editor->get_shader()->get_code();
 
 	ShaderPreprocessor processor(code);
 	String processed = processor.preprocess();
@@ -283,6 +289,7 @@ void ShaderTextEditor::_validate_script() {
 		}
 
 		bool highlight_error = false;
+		error_shader_path = shader->get_path();
 		if (context) {
 			if (!context->path.is_empty()) {
 				// we have to change files
@@ -296,7 +303,7 @@ void ShaderTextEditor::_validate_script() {
 			}
 		}
 
-		String error_text = "error(" + itos(adjusted_line) + "): " + sl.get_error_text();
+		String error_text = "error(" + error_shader_path + ":" + itos(adjusted_line) + "): " + sl.get_error_text();
 		set_error(error_text);
 		set_error_pos(adjusted_line - 1, 0);
 
@@ -806,6 +813,10 @@ void ShaderEditor::open_path(String path) {
 			}
 		}
 	}
+}
+
+Ref<Shader> ShaderEditor::get_shader() {
+	return shader;
 }
 
 void ShaderEditor::_tree_activate_shader() {
