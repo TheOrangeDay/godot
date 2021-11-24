@@ -7405,8 +7405,8 @@ Error ShaderLanguage::_validate_datatype(DataType p_type) {
 	return OK;
 }
 
-String ShaderLanguage::_preprocess_shader(const String &p_code, Error *p_error) {
-	*p_error = OK;
+String ShaderLanguage::_preprocess_shader(const String &p_code, Error *r_error) {
+	*r_error = OK;
 
 	ShaderPreprocessor processor(p_code);
 	String processed = processor.preprocess();
@@ -7417,7 +7417,7 @@ String ShaderLanguage::_preprocess_shader(const String &p_code, Error *p_error) 
 		error_set = true;
 		error_str = state->error;
 
-		*p_error = FAILED;
+		*r_error = FAILED;
 	}
 
 	return processed;
