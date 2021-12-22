@@ -299,8 +299,15 @@ void ShaderTextEditor::_validate_script() {
 	PreprocessorState *state = processor.get_state();
 	if (!state->error.is_empty()) {
 		// couldn't preprocess, so no sense in validating. Need to feed back issues to user.
-		String error_text = "error(" + state->current_include + ":" + itos(state->error_line) + "): " + state->error;
-		set_error(error_text);
+		// only write include path if there are includes
+		if (shader_editor->shader_dependencies.size() > 1) {
+			String error_text = "error(" + state->current_include + ":" + itos(state->error_line) + "): " + state->error;
+			set_error(error_text);
+		} else {
+			String error_text = "error(" + itos(state->error_line) + "): " + state->error;
+			set_error(error_text);
+		}
+
 		set_error_pos(state->error_line - 1, 0);
 
 		bool highlight_error = false;
@@ -356,8 +363,14 @@ void ShaderTextEditor::_validate_script() {
 			}
 		}
 
-		String error_text = "error(" + error_shader_path + ":" + itos(adjusted_line) + "): " + sl.get_error_text();
-		set_error(error_text);
+		// only write include path if there are includes
+		if (shader_editor->shader_dependencies.size() > 1) {
+			String error_text = "error(" + error_shader_path + ":" + itos(adjusted_line) + "): " + sl.get_error_text();
+			set_error(error_text);
+		} else {
+			String error_text = "error(" + itos(adjusted_line) + "): " + sl.get_error_text();
+			set_error(error_text);
+		}
 		set_error_pos(adjusted_line - 1, 0);
 
 		if (highlight_error) {
@@ -457,7 +470,7 @@ void ShaderTextEditor::_update_warning_panel() {
 				} else {
 					// TODO need a less intense yellow. set font color instead maybe?
 					// maybe use color * intensity used for preprocessor condition blocked code?
-					// tree_item->set_custom_bg_color(0, warning_color);
+					tree_item->set_custom_bg_color(0, warning_color * preprocessor_inactive_color_intensity);
 				}
 
 				warning_shader_path = context->path;
@@ -469,9 +482,14 @@ void ShaderTextEditor::_update_warning_panel() {
 		if (warning_count == 0) {
 			if (saved_treat_warning_as_errors) {
 				error_shader_path = warning_shader_path;
-				String error_text = "error(" + warning_shader_path + ":" + itos(adjusted_line) + "): " + w.get_message() + " " + TTR("Warnings should be fixed to prevent errors.");
+				if (shader_editor->shader_dependencies.size() > 1) {
+					String error_text = "error(" + warning_shader_path + ":" + itos(adjusted_line) + "): " + w.get_message() + " " + TTR("Warnings should be fixed to prevent errors.");
+					set_error(error_text);
+				} else {
+					String error_text = "error(" + itos(adjusted_line) + "): " + w.get_message() + " " + TTR("Warnings should be fixed to prevent errors.");
+					set_error(error_text);
+				}
 				set_error_pos(adjusted_line - 1, 0);
-				set_error(error_text);
 
 				if (highlight_error) {
 					get_text_editor()->set_line_background_color(adjusted_line - 1, marked_line_color);
@@ -490,7 +508,11 @@ void ShaderTextEditor::_update_warning_panel() {
 		warnings_panel->push_cell();
 		warnings_panel->push_meta(warning_data_array);
 		warnings_panel->push_color(warning_color);
-		warnings_panel->add_text(warning_shader_path + " - " + TTR("Line") + " " + itos(adjusted_line));
+		if (shader_editor->shader_dependencies.size() > 1) {
+			warnings_panel->add_text(warning_shader_path + " - " + TTR("Line") + " " + itos(adjusted_line));
+		} else {
+			warnings_panel->add_text(TTR("Line") + " " + itos(adjusted_line));
+		}
 		warnings_panel->add_text(" (" + w.get_name() + "):");
 		warnings_panel->pop(); // Color.
 		warnings_panel->pop(); // Meta goto.
