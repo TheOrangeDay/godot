@@ -1441,11 +1441,12 @@ Error ShaderCompilerRD::compile(RS::ShaderMode p_mode, const String &p_code, Ide
 			if (!context->shader.is_null()) {
 				shader = context->shader->get_code().split("\n");
 				path = context->shader->get_path();
-			} else if (!context->path.is_empty()) {
+			} else if (!context->get_path().is_empty()) {
 				shader = context->code.split("\n");
-				path = context->path;
-			} else
+				path = context->get_path();
+			} else {
 				shader = p_code.split("\n");
+			}
 		} else {
 			shader = p_code.split("\n");
 		}
